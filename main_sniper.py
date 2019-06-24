@@ -9,10 +9,10 @@ screenWidth = 1400
 screenlength = 800
 sightOpen = False
 fps = 100
-centerX = screenWidth/2
-centerY = screenlength/2
+centerX = screenWidth//2
+centerY = screenlength//2
 sensitivityClose = 1
-sensitivityOpen = 0.5
+sensitivityOpen = 1
 magnification = 2
 
 """產生標靶"""
@@ -50,6 +50,7 @@ def main():
     global magnification
     pygame.init()
     objects = []
+    Fonts = []
     screen = pygame.display.set_mode((screenWidth,screenlength))
     pygame.display.set_caption("test")
     smallfont = pygame.font.Font(None, 24)
@@ -59,6 +60,8 @@ def main():
     pyGameStart1 = bigfont.render("Press \"space\" to start", True, (122, 122, 0))
     pyGameStart2 = bigfont.render("Press \"esc\" to end game", True, (122,122, 0))
     pyGameStart3 = bigfont.render("Press \"r\" to restart", True, (122, 122, 0))
+    pyMiss = smallfont.render("miss", True, (255, 0, 0))
+    pyScore = smallfont.render("score", True, (0, 255, 0))
     """420"""
     sightImage = pygame.image.load("./image/sight.png")
     """3000"""
@@ -84,7 +87,7 @@ def main():
                     sys.exit()
         pygame.display.flip()
     """游標遮蔽"""
-    pygame.mouse.set_visible(False)
+    pygame.mouse.set_visible(True)
     mousePosition = pygame.mouse.get_pos()
     positionX = centerX
     positionY = centerY
@@ -93,8 +96,8 @@ def main():
         clock.tick(fps)
         now = pygame.time.get_ticks()/1000 - initime
         mousePosition = pygame.mouse.get_pos()
-        x = int(mousePosition[0])
-        y = int(mousePosition[1])
+        x = mousePosition[0]
+        y = mousePosition[1]
         distanceX = x - centerX
         distanceY = y - centerY
         """開鏡設定"""
@@ -110,7 +113,10 @@ def main():
             for i in objects:
                 i.sightCloseMode(positionX, positionY, magnification)
         screen.fill((0,0,0))
-        pygame.draw.rect(screen, (255,255,255), (0, 0, screenWidth, screenlength))
+        if sightOpen:
+            pygame.draw.rect(screen, (255,255,255), (centerX-positionX*magnification, centerY-positionY*magnification, screenWidth*magnification, screenlength*magnification))
+        else:
+            pygame.draw.rect(screen, (255,255,255), (centerX-positionX, centerY-positionY, screenWidth, screenlength))
         for i in objects:
             """物件存活時間檢測"""
             if now - i.t >= 100:
@@ -124,19 +130,20 @@ def main():
                     i.stop = 20
                 if i.stop:
                     i.stop -= 1
-                pygame.draw.circle(screen, (100,100,100), (i.x, i.y), i.r)
-                pygame.draw.circle(screen, (150,100,100), (i.x, i.y), i.r1)
-                pygame.draw.circle(screen, (255,100,100), (i.x, i.y), i.r2)
+                pygame.draw.circle(screen, (100,100,100), (i.x-positionX+centerX, i.y-positionY+centerY), i.r)
+                pygame.draw.circle(screen, (150,100,100), (i.x-positionX+centerX, i.y-positionY+centerY), i.r1)
+                pygame.draw.circle(screen, (255,100,100), (i.x-positionX+centerX, i.y-positionY+centerY), i.r2)
                 """物件離開範圍"""
                 if (i.outofscreen(screenWidth, screenlength) and sightOpen == False):
                     objects.remove(i)
                     missTarget += 1
-        if sightOpen:
-            positionX += distanceX * sensitivityOpen
-            positionY += distanceY * sensitivityOpen
-        else:
-            positionX += distanceX * sensitivityClose
-            positionY += distanceY * sensitivityClose
+        if now > 1:
+            if sightOpen:
+                positionX += math.floor(distanceX * sensitivityOpen)
+                positionY += math.floor(distanceY * sensitivityOpen)
+            else:
+                positionX += math.floor(distanceX * sensitivityClose)
+                positionY += math.floor(distanceY * sensitivityClose)
         """使用者輸入設定"""
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -154,8 +161,10 @@ def main():
                         score += a
                         hitAnyTargets = True
                         objects.remove(i)
+                        Fonts.append(object.Font(pyScore, centerX, centerY))
                 if hitAnyTargets == False:
                     failtimes += 1
+                    Fonts.append(object.Font(pyMiss, centerX, centerY))
         """每一秒產生"""
         if now - s >= 1 and now<=10:
             s += 1
@@ -169,11 +178,17 @@ def main():
         screen.blit(pyfailtimes, (0,30))
         screen.blit(pymissTarget, (0,60))
         screen.blit(pytime, (screenWidth-50, 0))
+        for i in Fonts:
+            if i != None:
+                screen.blit(i.font, (i.x, i.y))
+                i.move()
+                if i.t <= 0:
+                    Fonts.remove(i)
         pygame.mouse.set_pos(centerX, centerY)
         if sightOpen:
-            screen.blit(sniperSightImage, (positionX-1500,positionY-1500))
+            screen.blit(sniperSightImage, (centerX-1500,centerY-1500))
         else:
-            screen.blit(sightImage, (positionX-210,positionY-210))
+            screen.blit(sightImage, (centerX-210,centerY-210))
         pygame.display.flip()
         """time over"""
         if now >= 12:

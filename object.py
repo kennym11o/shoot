@@ -53,3 +53,14 @@ class Circle():
         self.pos = (self.x, self.y)
     def print(self):
         print("x: " + str(self.x) + "\ny:" + str(self.y) + "\nr: " +str(self.r) + "\nr1: " + str(self.r1) + "\nr2: " + str(self.r2))
+
+class Font():
+    def __init__(self, font, x, y, t = 10):
+        self.font = font
+        self.x = x
+        self.y = y
+        self.t = t
+    def move(self, x=2, y=2):
+        self.x += x
+        self.y += y
+        self.t -= 1
