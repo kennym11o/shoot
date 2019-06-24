@@ -1,7 +1,7 @@
 import math
 
 class Circle():
-    def __init__(self, pos, r, r1, r2, xSpeed = 0, ySpeed = 0, t = 900):
+    def __init__(self, pos, r, r1, r2, xSpeed = 0, ySpeed = 0, t=3000):
         self.pos = pos
         self.x = pos[0]
         self.y = pos[1]
