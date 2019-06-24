@@ -39,8 +39,8 @@ class Circle():
         self.r2*=magnification
         self.xSpeed*=magnification
         self.ySpeed*=magnification
-        self.x = (self.x - x)*magnification + x
-        self.y = (self.y - y)*magnification + y
+        self.x = math.floor((self.x - x)*magnification + x)
+        self.y = math.floor((self.y - y)*magnification + y)
         self.pos = (self.x, self.y)
     def sightCloseMode(self, x, y, magnification):
         self.r//=magnification
@@ -48,8 +48,8 @@ class Circle():
         self.r2//=magnification
         self.xSpeed//=magnification
         self.ySpeed//=magnification
-        self.x = (self.x - x)//magnification + x//1
-        self.y = (self.y - y)//magnification + y//1
+        self.x = math.floor((self.x - x)//magnification + x//1)
+        self.y = math.floor((self.y - y)//magnification + y//1)
         self.pos = (self.x, self.y)
     def print(self):
         print("x: " + str(self.x) + "\ny:" + str(self.y) + "\nr: " +str(self.r) + "\nr1: " + str(self.r1) + "\nr2: " + str(self.r2))

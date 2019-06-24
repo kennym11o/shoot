@@ -2,18 +2,18 @@ import pygame
 import object
 import random
 import sys
-import pyautogui
+import math
 
 """皆為整數"""
 screenWidth = 1400
 screenlength = 800
 sightOpen = False
-fps = 50
-centerX = 1000
-centerY = 500
+fps = 100
+centerX = screenWidth/2
+centerY = screenlength/2
 sensitivityClose = 1
-sensitivityOpen = 4
-magnification = 4
+sensitivityOpen = 0.5
+magnification = 2
 
 """產生標靶"""
 def initCircleObject(t):
@@ -24,8 +24,8 @@ def initCircleObject(t):
         r = random.randrange(10*magnification, 20*magnification)
         r1 = int(r/2)
         r2 = int(r1/2)
-        x = random.randrange(r+100*magnification, screenWidth-r-100*magnification)
-        y = random.randrange(r+50*magnification, screenlength-r-50*magnification)
+        x = random.randrange(r+100*magnification, (screenWidth-100)*magnification-r)
+        y = random.randrange(r+50*magnification, (screenlength-50)*magnification-r)
         xs = random.randrange(-2*magnification, 2*magnification)
         ys = random.randrange(-2*magnification, 2*magnification)
     else:
@@ -85,15 +85,14 @@ def main():
         pygame.display.flip()
     """游標遮蔽"""
     pygame.mouse.set_visible(False)
-    positionX = pyautogui.position()[0]
-    positionY = pyautogui.position()[1]
+    mousePosition = pygame.mouse.get_pos()
+    positionX = centerX
+    positionY = centerY
     initime = pygame.time.get_ticks()/1000
     while running:
-        now = pygame.time.get_ticks()/1000 - initime
         clock.tick(fps)
-        pyautogui.moveTo(centerX, centerY)
-        pyautogui.PAUSE = fps/1000
-        mousePosition = pyautogui.position()
+        now = pygame.time.get_ticks()/1000 - initime
+        mousePosition = pygame.mouse.get_pos()
         x = int(mousePosition[0])
         y = int(mousePosition[1])
         distanceX = x - centerX
@@ -102,23 +101,19 @@ def main():
         if pygame.mouse.get_pressed()[2] and sightOpen == False:
             print(1)
             sightOpen = True
-            screenWidth *= magnification
-            screenlength *= magnification
             for i in objects:
                 i.sightOpenMode(positionX, positionY, magnification)
         """關鏡設定"""
         if pygame.mouse.get_pressed()[2] == False and sightOpen == True:
             print(0)
             sightOpen = False
-            screenWidth /= magnification
-            screenlength /= magnification
             for i in objects:
                 i.sightCloseMode(positionX, positionY, magnification)
         screen.fill((0,0,0))
         pygame.draw.rect(screen, (255,255,255), (0, 0, screenWidth, screenlength))
         for i in objects:
             """物件存活時間檢測"""
-            if now - i.t >= 5:
+            if now - i.t >= 100:
                 objects.remove(i)
                 missTarget += 1
             if i != None:
@@ -133,7 +128,7 @@ def main():
                 pygame.draw.circle(screen, (150,100,100), (i.x, i.y), i.r1)
                 pygame.draw.circle(screen, (255,100,100), (i.x, i.y), i.r2)
                 """物件離開範圍"""
-                if i.outofscreen(screenWidth, screenlength) and sightOpen == False:
+                if (i.outofscreen(screenWidth, screenlength) and sightOpen == False):
                     objects.remove(i)
                     missTarget += 1
         if sightOpen:
@@ -148,8 +143,6 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     sys.exit()
                 if event.key == pygame.K_r:
-                    screenWidth = 1400
-                    screenlength = 800
                     main()
                 if event.key == pygame.K_s:
                     running = False
@@ -163,7 +156,6 @@ def main():
                         objects.remove(i)
                 if hitAnyTargets == False:
                     failtimes += 1
-
         """每一秒產生"""
         if now - s >= 1 and now<=10:
             s += 1
@@ -177,11 +169,11 @@ def main():
         screen.blit(pyfailtimes, (0,30))
         screen.blit(pymissTarget, (0,60))
         screen.blit(pytime, (screenWidth-50, 0))
+        pygame.mouse.set_pos(centerX, centerY)
         if sightOpen:
             screen.blit(sniperSightImage, (positionX-1500,positionY-1500))
         else:
             screen.blit(sightImage, (positionX-210,positionY-210))
-
         pygame.display.flip()
         """time over"""
         if now >= 12:
@@ -203,8 +195,6 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     sys.exit()
                 if event.key == pygame.K_r:
-                    screenWidth = 1400
-                    screenlength = 800
                     main()
 
 
